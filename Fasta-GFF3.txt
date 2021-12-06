@@ -1,0 +1,10 @@
+Zea_mays.B73_RefGen_v4.dna.chromosome.1.fa:Zea_mays.B73_RefGen_v4.48.chromosome.1.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.2.fa:Zea_mays.B73_RefGen_v4.48.chromosome.2.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.3.fa:Zea_mays.B73_RefGen_v4.48.chromosome.3.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.4.fa:Zea_mays.B73_RefGen_v4.48.chromosome.4.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.5.fa:Zea_mays.B73_RefGen_v4.48.chromosome.5.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.6.fa:Zea_mays.B73_RefGen_v4.48.chromosome.6.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.7.fa:Zea_mays.B73_RefGen_v4.48.chromosome.7.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.8.fa:Zea_mays.B73_RefGen_v4.48.chromosome.8.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.9.fa:Zea_mays.B73_RefGen_v4.48.chromosome.9.gff3
+Zea_mays.B73_RefGen_v4.dna.chromosome.10.fa:Zea_mays.B73_RefGen_v4.48.chromosome.10.gff3
