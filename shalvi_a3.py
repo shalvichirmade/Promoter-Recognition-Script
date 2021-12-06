@@ -116,9 +116,9 @@ for file in complete_gff3: #Remember this was a list of lists
 selected_genes_class_gff3 = [] #Make a list of only the genes present in the co-expressed gene list
 #Be aware that the gene order in this list is not the same as the gene order in genes_list.
 
-for value in complete_class_gff3:
-    if (value.name in genes_list):
-        selected_genes_class_gff3.append(value)
+for object in complete_class_gff3:
+    if (object.name in genes_list):
+        selected_genes_class_gff3.append(object)
 
 #Check to see if there any duplicated genes in your list.
 if len(genes_list) == len(selected_genes_class_gff3):
@@ -128,9 +128,46 @@ elif len(genes_list) > len(selected_genes_class_gff3):
 else:
     print("\nYou may have multiple TSSs for a few genes. Please choose the most upstream one.")
 
+#For our list, there are no multiple TSSs for any of the genes, so we will proceed.
+
+
+#Now we need to extract the promoter region for each gene of interest; this corresponds to 500 nucleotides upstream from the start of the gene. If the gene is on the + strand, 500 nucleotides is 500-start position. If the gene is on the - strand, 500 nucleotides is 500+end position.
+promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
+
+for object in selected_genes_class_gff3:
+    chromosome_number = object.chr
+
+    if object.strand == "+":
+        start_seq = object.start
+        seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
+        promoter_sequence.append(seq)
+    
+    elif object.strand == "-":
+        start_seq = object.end
+        seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
+        promoter_sequence.append(seq)
+        
+#Check to see if there are any N bases in the promoter regions that have been chosen. If so, delete them.
+which_seq_N = [] #Make a list of the indexes where the sequence contians an N
+index = 0
+
+for seq in promoter_sequence:
+    if "N" in seq:
+        which_seq_N.append(index)
+        index += 1
+
+#There are no N's in our sequences.
+#print(len(which_seq_N), "in positions", which_seq_N)
+
+
 
 
 
     
 
 
+
+
+
+#Need to do:
+#Chose upstream gene if more than one entry in selected_genes_class_gff3
