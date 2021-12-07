@@ -122,7 +122,7 @@ for object in complete_class_gff3:
 
 #Check to see if there any duplicated genes in your list.
 if len(genes_list) == len(selected_genes_class_gff3):
-    print("\nThere are no multiple TSSs for your genes.")
+    print("\nThere are no multiple TSSs for your selected genes.")
 elif len(genes_list) > len(selected_genes_class_gff3):
     print("\nThere are some genes from your list that have not been found. Please make sure you have included the correct gene names and restart this program.")
 else:
@@ -147,12 +147,18 @@ for object in selected_genes_class_gff3:
         seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
         promoter_sequence.append(seq)
         
+
+#Repeated this code to check if I was extracting the correct promoter sequences.
+# print(selected_genes_class_gff3[0].name, selected_genes_class_gff3[0].start)
+# print(complete_dna[0].find(promoter_sequence[0]))
+
 #Check to see if there are any N bases in the promoter regions that have been chosen. If so, delete them.
 which_seq_N = [] #Make a list of the indexes where the sequence contians an N
 index = 0
 
 for seq in promoter_sequence:
     if "N" in seq:
+        seq.replace("N", "") #Remove all Ns
         which_seq_N.append(index)
         index += 1
 
@@ -160,11 +166,88 @@ for seq in promoter_sequence:
 #print(len(which_seq_N), "in positions", which_seq_N)
 
 
+#Using the list of known promoter motifs, find the number of times each motif is seen in the list of promoter sequences. We were told to count every occurence; even if the motif is displayed multiple times in one sequence, count all of them, even overlapping sequences.
+
+import re #Regular expression library
+
+motif_dict = {} #Make a dictionary counting the number of times the motif sequence is present
+
+for motif in motif_list:
+    count = 0
+    for seq in promoter_sequence:
+        match = str("(?=" + motif + ")") #To count all occurences of the motif
+        count += len(re.findall(match, seq, re.I)) #To ignore cases
+        
+    motif_dict[motif] = count
+
+
+#Write the motif_dict into a file for submission.
+selected_genes_output = open(file_path + "/Selected_Genes_Output.txt", "w")
+
+selected_genes_output.write("Motifs\tCounts\n\n") #Title for output file
+for motif in motif_dict:
+    selected_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
+
+selected_genes_output.close()
 
 
 
+##Randomly select 600 genes from complete_class_gff3 and conduct the same analysis. I chose 600 as the gene file contained 593 genes.
+import random
+random_genes_class_gff3 = random.sample(complete_class_gff3, 600)
+
+#Check if any of the gene names have been duplicated.
+random_gene_set = set() #Sets can not have duplicates
+for gene in random_genes_class_gff3:
+    random_gene_set.add(gene.name)
+
+if (len(random_gene_set) == len(random_genes_class_gff3)): #If the length of the set matches the number of randomly chosen genes, then there are no duplicates
+    print("Randomly selected genes have no duplicates.")
+else:
+    print("Randomly selected genes have duplicates.")
+
+#Extract promoter sequences 
+promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
+
+for object in random_genes_class_gff3:
+    chromosome_number = object.chr
+
+    if object.strand == "+":
+        start_seq = object.start
+        seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
+        promoter_sequence.append(seq)
     
+    elif object.strand == "-":
+        start_seq = object.end
+        seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
+        promoter_sequence.append(seq)
 
+#Remove any Ns.
+for seq in promoter_sequence:
+    if "N" in seq:
+        seq.replace("N", "")
+
+#Create motif dictionary to store counts.
+motif_dict = {}
+for motif in motif_list:
+    count = 0
+    for seq in promoter_sequence:
+        match = str("(?=" + motif + ")") #To count all occurences of the motif
+        count += len(re.findall(match, seq, re.I)) #To ignore cases
+        
+    motif_dict[motif] = count
+
+
+#Write the motif_dict into a file for submission.
+random_genes_output = open(file_path + "/Random_Genes_Output.txt", "w")
+
+random_genes_output.write("Motifs\tCounts\n\n") #Title for output file
+for motif in motif_dict:
+    random_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
+
+random_genes_output.close()
+
+##In the mutiple tries I have run, I have found that every time I chose a different selection of random genes, the number of motifs found are consistent with the values of the selected genes. There are no motifs, that I have seen, that are notably over or under represented amongst the coexpressed genes!
 
 
 
