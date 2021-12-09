@@ -15,7 +15,7 @@ while True:
 
     print("\nYour file path is", file_path)
 
-    correct = input("\nPlease double-check your file path; it should NOT end with a backslash. Do you wish to continue? Enter y or n. ")
+    correct = input("\nPlease double-check your file path; it should end with a slash. Do you wish to continue? Enter y or n. ")
 
     if correct == "y":
         print("\nYou have entered the correct file path, we will continue.\n")
@@ -26,7 +26,7 @@ while True:
         print("\nYou have not entered the appropriate letter. Please try again.")
 
 #Extract the FASTA and GFF3 file names in Fasta-GFF3.txt
-fg_file_name = file_path + "/Fasta-GFF3.txt"
+fg_file_name = file_path + "Fasta-GFF3.txt"
 
 fg_file = open(fg_file_name)
 fasta_file_names = []
@@ -45,7 +45,7 @@ num = 1
 print("This step takes a long time, please be patient.")
 
 for name in fasta_file_names:
-    fasta = open(file_path + "/" + name)  
+    fasta = open(file_path + name)  
     dna = ""
     for line in fasta.readlines():
         if line.startswith(">"):
@@ -60,10 +60,10 @@ for name in fasta_file_names:
 #Open each GFF3 file and store lines for all genes.
 complete_gff3 = [] #A list where every element is the gff3 file containing gene lines. Each element is a list, where each element is each gene line
 num = 1
-print("Inputting GFF3 files.")
+print("\nInputting GFF3 files.")
 
 for name in gff3_file_names:
-    gff3 = open(file_path + "/" + name)
+    gff3 = open(file_path + name)
     genes = []
 
     for line in gff3.readlines():
@@ -79,14 +79,14 @@ for name in gff3_file_names:
 
 
 #Read in the gene names and motif sequence files.
-gene_name_file = open(file_path + "/zea_mays_genes.txt")
+gene_name_file = open(file_path + "zea_mays_genes.txt")
 genes_list = [] #Make a list of the co-expressed genes
 for line in gene_name_file:
     genes_list.append(line.rstrip())
 
 gene_name_file.close()
 
-motif_file = open(file_path + "/promoters.txt")
+motif_file = open(file_path + "promoters.txt")
 motif_list = [] #Make a list of the motif sequences
 for line in motif_file:
     motif_list.append(line.rstrip())
@@ -150,9 +150,18 @@ def reverse_complement(dna):
     complement_dict = {"A" : "T",
                         "T" : "A", 
                         "C" : "G", 
-                        "G" : "C"}
+                        "G" : "C",
+                        "N" : "N"}
 
     return("".join(complement_dict[base] for base in reversed(dna)))
+
+#A function to see if there any Ns in the promoter sequence and only extratc the downstream bases from the Ns.
+def downstream_seq(dna):
+    dna_length = len(dna)
+    last_N = dna.rfind("N")
+    new_dna = dna[last_N+1:dna_length]
+    
+    return (new_dna)
 
 promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
 
@@ -175,10 +184,17 @@ for object in selected_genes_class_gff3:
 # print(selected_genes_class_gff3[0].name, selected_genes_class_gff3[0].start)
 # print(complete_dna[0].find(promoter_sequence[0]))
 
-#Check to see if there are any N bases in the promoter regions that have been chosen. If so, delete them.
+#If there are any N's in the promoter sequences, the instructions ask us to disregard any bases before the N's and only carry n with the downstream bases.
+iter = 0
 for seq in promoter_sequence:
     if "N" in seq:
-        seq.replace("N", "")
+        promoter_sequence[iter] = downstream_seq(seq)
+        iter += 1
+
+# #Check to see if there are any N bases in the promoter regions that have been chosen. If so, delete them.
+# for seq in promoter_sequence:
+#     if "N" in seq:
+#         seq.replace("N", "")
 
 #There are no N's in our selected promoters.
 
@@ -199,7 +215,7 @@ for motif in motif_list:
 
 
 #Write the motif_dict into a file for submission.
-selected_genes_output = open(file_path + "/Selected_Genes_Output.txt", "w")
+selected_genes_output = open(file_path + "Selected_Genes_Output.txt", "w")
 
 selected_genes_output.write("Motifs\tCounts\n\n") #Title for output file
 for motif in motif_dict:
@@ -240,10 +256,12 @@ for object in random_genes_class_gff3:
         rc_seq = reverse_complement(seq)
         promoter_sequence.append(rc_seq)
 
-#Remove any Ns.
+#Remove any Ns; choose downstream
+iter = 0
 for seq in promoter_sequence:
     if "N" in seq:
-        seq.replace("N", "")
+        promoter_sequence[iter] = downstream_seq(seq)
+        iter += 1
 
 #Create motif dictionary to store counts.
 motif_dict = {}
@@ -257,7 +275,7 @@ for motif in motif_list:
 
 
 #Write the motif_dict into a file for submission.
-random_genes_output = open(file_path + "/Random_Genes_Output.txt", "w")
+random_genes_output = open(file_path + "Random_Genes_Output.txt", "w")
 
 random_genes_output.write("Motifs\tCounts\n\n") #Title for output file
 for motif in motif_dict:
