@@ -225,9 +225,9 @@ selected_genes_output.close()
 
 
 
-##Randomly select 600 genes from complete_class_gff3 and conduct the same analysis. I chose 600 as the zea_mays_genes.txt file contained 594 genes.
+##Randomly select 594 genes from complete_class_gff3 and conduct the same analysis. This number was chosen as the zea_mays_genes.txt files contains a list of 594 genes.
 import random #The only way I found to be able to randomly select entries
-random_genes_class_gff3 = random.sample(complete_class_gff3, 600)
+random_genes_class_gff3 = random.sample(complete_class_gff3, 594) 
 
 # #Check if any of the gene names have been duplicated.
 # random_gene_set = set() #Sets can not have duplicates
