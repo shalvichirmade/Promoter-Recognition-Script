@@ -77,6 +77,7 @@ for name in gff3_file_names:
     num += 1
     gff3.close()
 
+
 #Read in the gene names and motif sequence files.
 gene_name_file = open(file_path + "/zea_mays_genes.txt")
 genes_list = [] #Make a list of the co-expressed genes
@@ -112,6 +113,17 @@ for file in complete_gff3: #Remember this was a list of lists
         complete_class_gff3.append(GFF(gene))
 
 
+#Check to see if there are any duplicated gene entries. If yes then there may be more than one entry for a particular gene. If not then there are no multiple TSSs for any of the Zea mays genes.
+complete_gene_set = set() #Sets can not have duplicates
+for gene in complete_class_gff3:
+    complete_gene_set.add(gene.name)
+
+if (len(complete_gene_set) == len(complete_class_gff3)): #If the length of the set matches the number of complete genes, then there are no duplicates
+    print("\nThere are no duplicates in our whole collection of genes from Zea mays; there are no multiple TSSs for any of our genes.")
+else:
+    print("\nThere are gene duplicates.")
+
+
 #Use the names of the co-expressed genes to create a list only containing the GFF3 lines for those genes.
 selected_genes_class_gff3 = [] #Make a list of only the genes present in the co-expressed gene list
 #Be aware that the gene order in this list is not the same as the gene order in genes_list.
@@ -120,18 +132,28 @@ for object in complete_class_gff3:
     if (object.name in genes_list):
         selected_genes_class_gff3.append(object)
 
-#Check to see if there any duplicated genes in your list.
-if len(genes_list) == len(selected_genes_class_gff3):
-    print("\nThere are no multiple TSSs for your selected genes.")
-elif len(genes_list) > len(selected_genes_class_gff3):
-    print("\nThere are some genes from your list that have not been found. Please make sure you have included the correct gene names and restart this program.")
-else:
-    print("\nYou may have multiple TSSs for a few genes. Please choose the most upstream one.")
+# #Check to see if there any duplicated genes in your list.
+# if len(genes_list) == len(selected_genes_class_gff3):
+#     print("\nThere are no multiple TSSs for your selected genes.")
+# elif len(genes_list) > len(selected_genes_class_gff3):
+#     print("\nThere are some genes from your list that have not been found. Please make sure you have included the correct gene names and restart this program.")
+# else:
+#     print("\nYou may have multiple TSSs for a few genes. Please choose the most upstream one.")
 
-#For our list, there are no multiple TSSs for any of the genes, so we will proceed.
+# #For our list, there are no multiple TSSs for any of the genes, so we will proceed.
 
 
 #Now we need to extract the promoter region for each gene of interest; this corresponds to 500 nucleotides upstream from the start of the gene. If the gene is on the + strand, 500 nucleotides is 500-start position. If the gene is on the - strand, 500 nucleotides is 500+end position.
+
+#A function to reverse complement the - strand.
+def reverse_complement(dna):
+    complement_dict = {"A" : "T",
+                        "T" : "A", 
+                        "C" : "G", 
+                        "G" : "C"}
+
+    return("".join(complement_dict[base] for base in reversed(dna)))
+
 promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
 
 for object in selected_genes_class_gff3:
@@ -145,7 +167,8 @@ for object in selected_genes_class_gff3:
     elif object.strand == "-":
         start_seq = object.end
         seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
-        promoter_sequence.append(seq)
+        rc_seq = reverse_complement(seq)
+        promoter_sequence.append(rc_seq)
         
 
 #Repeated this code to check if I was extracting the correct promoter sequences.
@@ -153,17 +176,11 @@ for object in selected_genes_class_gff3:
 # print(complete_dna[0].find(promoter_sequence[0]))
 
 #Check to see if there are any N bases in the promoter regions that have been chosen. If so, delete them.
-which_seq_N = [] #Make a list of the indexes where the sequence contians an N
-index = 0
-
 for seq in promoter_sequence:
     if "N" in seq:
-        seq.replace("N", "") #Remove all Ns
-        which_seq_N.append(index)
-        index += 1
+        seq.replace("N", "")
 
-#There are no N's in our sequences.
-#print(len(which_seq_N), "in positions", which_seq_N)
+#There are no N's in our selected promoters.
 
 
 #Using the list of known promoter motifs, find the number of times each motif is seen in the list of promoter sequences. We were told to count every occurence; even if the motif is displayed multiple times in one sequence, count all of them, even overlapping sequences.
@@ -192,19 +209,19 @@ selected_genes_output.close()
 
 
 
-##Randomly select 600 genes from complete_class_gff3 and conduct the same analysis. I chose 600 as the gene file contained 593 genes.
-import random
+##Randomly select 600 genes from complete_class_gff3 and conduct the same analysis. I chose 600 as the zea_mays_genes.txt file contained 594 genes.
+import random #The only way I found to be able to randomly select entries
 random_genes_class_gff3 = random.sample(complete_class_gff3, 600)
 
-#Check if any of the gene names have been duplicated.
-random_gene_set = set() #Sets can not have duplicates
-for gene in random_genes_class_gff3:
-    random_gene_set.add(gene.name)
+# #Check if any of the gene names have been duplicated.
+# random_gene_set = set() #Sets can not have duplicates
+# for gene in random_genes_class_gff3:
+#     random_gene_set.add(gene.name)
 
-if (len(random_gene_set) == len(random_genes_class_gff3)): #If the length of the set matches the number of randomly chosen genes, then there are no duplicates
-    print("Randomly selected genes have no duplicates.")
-else:
-    print("Randomly selected genes have duplicates.")
+# if (len(random_gene_set) == len(random_genes_class_gff3)): #If the length of the set matches the number of randomly chosen genes, then there are no duplicates
+#     print("\nRandomly selected genes have no duplicates.")
+# else:
+#     print("\nRandomly selected genes have duplicates.")
 
 #Extract promoter sequences 
 promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
@@ -220,7 +237,8 @@ for object in random_genes_class_gff3:
     elif object.strand == "-":
         start_seq = object.end
         seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
-        promoter_sequence.append(seq)
+        rc_seq = reverse_complement(seq)
+        promoter_sequence.append(rc_seq)
 
 #Remove any Ns.
 for seq in promoter_sequence:
@@ -252,5 +270,4 @@ random_genes_output.close()
 
 
 
-#Need to do:
-#Chose upstream gene if more than one entry in selected_genes_class_gff3
+
