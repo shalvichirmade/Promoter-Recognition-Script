@@ -80,7 +80,7 @@ for name in gff3_file_names:
 
 #A function to read in files per line.
 def read_file(file_name):
-    file = open(file_path + str(file_name))
+    file = open(file_name)
     file_list = []
     for line in file:
         file_list.append(line.rstrip())
@@ -90,8 +90,8 @@ def read_file(file_name):
 
 
 #Read in the gene names and motif sequence files. 
-genes_list = read_file("zea_mays_genes.txt")
-motif_list = read_file("promoters.txt")
+genes_list = read_file(file_path + "zea_mays_genes.txt")
+motif_list = read_file(file_path + "promoters.txt")
 
 
 # gene_name_file = open(file_path + "zea_mays_genes.txt")
@@ -134,7 +134,7 @@ for gene in complete_class_gff3:
     complete_gene_set.add(gene.name)
 
 if (len(complete_gene_set) == len(complete_class_gff3)): #If the length of the set matches the number of complete genes, then there are no duplicates
-    print("\nThere are no duplicates in our whole collection of genes from Zea mays; there are no multiple TSSs for any of our genes.")
+    print("\nThere are no duplicates in our whole collection of genes from Zea mays; there are no multiple TSSs for any of our genes.\n")
 else:
     print("\nThere are gene duplicates.")
 
@@ -242,25 +242,56 @@ for seq in promoter_sequence:
 
 import re #Regular expression library
 
-motif_dict = {} #Make a dictionary counting the number of times the motif sequence is present
+#A function to count the number of times the motif sequence is present and write the output to a new file.
+def motif_output_file(m_list, pr_seq, file_name):
+    
+    motif_dict = {} #Make a dictionary counting the number of times the motif sequence is present
 
-for motif in motif_list:
-    count = 0
-    for seq in promoter_sequence:
-        match = str("(?=" + motif + ")") #To count all occurences of the motif
-        count += len(re.findall(match, seq, re.I)) #To ignore cases
+    for motif in m_list:
+        count = 0
+        for seq in pr_seq:
+            match = str("(?=" + motif + ")") #To count all occurences of the motif
+            count += len(re.findall(match, seq, re.I)) #To ignore cases
+            
+        motif_dict[motif] = count
+
+
+    #Write the motif_dict into a file for submission.
+    genes_output = open(file_name, "w")
+
+    genes_output.write("Motifs\tCounts\n\n") #Title for output file
+    for motif in motif_dict:
+        genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
+
+    genes_output.close()
+
+    return (print("The file, " + file_name + " has been created."))
+
+
+#Write the selected genes output to a new file for submission.
+motif_output_file(motif_list, promoter_sequence, file_path + "Selected_Genes_Output.txt")
+
+
+
+# motif_dict = {} #Make a dictionary counting the number of times the motif sequence is present
+
+# for motif in motif_list:
+#     count = 0
+#     for seq in promoter_sequence:
+#         match = str("(?=" + motif + ")") #To count all occurences of the motif
+#         count += len(re.findall(match, seq, re.I)) #To ignore cases
         
-    motif_dict[motif] = count
+#     motif_dict[motif] = count
 
 
-#Write the motif_dict into a file for submission.
-selected_genes_output = open(file_path + "Selected_Genes_Output.txt", "w")
+# #Write the motif_dict into a file for submission.
+# selected_genes_output = open(file_path + "Selected_Genes_Output.txt", "w")
 
-selected_genes_output.write("Motifs\tCounts\n\n") #Title for output file
-for motif in motif_dict:
-    selected_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
+# selected_genes_output.write("Motifs\tCounts\n\n") #Title for output file
+# for motif in motif_dict:
+#     selected_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
 
-selected_genes_output.close()
+# selected_genes_output.close()
 
 
 
@@ -306,25 +337,28 @@ for seq in promoter_sequence:
         iter += 1
 
 #Create motif dictionary to store counts.
-motif_dict = {}
-for motif in motif_list:
-    count = 0
-    for seq in promoter_sequence:
-        match = str("(?=" + motif + ")") #To count all occurences of the motif
-        count += len(re.findall(match, seq, re.I)) #To ignore cases
+# motif_dict = {}
+# for motif in motif_list:
+#     count = 0
+#     for seq in promoter_sequence:
+#         match = str("(?=" + motif + ")") #To count all occurences of the motif
+#         count += len(re.findall(match, seq, re.I)) #To ignore cases
         
-    motif_dict[motif] = count
+#     motif_dict[motif] = count
 
 
 
-#Write the motif_dict into a file for submission.
-random_genes_output = open(file_path + "Random_Genes_Output.txt", "w")
+# #Write the motif_dict into a file for submission.
+# random_genes_output = open(file_path + "Random_Genes_Output.txt", "w")
 
-random_genes_output.write("Motifs\tCounts\n\n") #Title for output file
-for motif in motif_dict:
-    random_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
+# random_genes_output.write("Motifs\tCounts\n\n") #Title for output file
+# for motif in motif_dict:
+#     random_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
 
-random_genes_output.close()
+# random_genes_output.close()
+
+#Write the random genes output to a new file for submission.
+motif_output_file(motif_list, promoter_sequence, file_path + "Random_Genes_Output.txt")
 
 ##In the mutiple tries I have run, I have found that every time I chose a different selection of random genes, the number of motifs found are consistent with the values of the selected genes. There are no motifs, that I have seen, that are notably over or under represented amongst the coexpressed genes!
 
