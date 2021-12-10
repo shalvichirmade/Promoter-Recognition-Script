@@ -1,7 +1,7 @@
 ##Assignment 3 - BINF 6410
 ##By Shalvi Chirmade - December 13, 2021
 
-##Searching for known motifs in the promoter region of coexpressed genes in Zea Mays. 
+##Searching for known motifs in the promoter region of coexpressed genes in Zea mays. 
 
 
 #Created a file that contains the names of the fasta files and their corresponding gff3 file. This file can be edited to represent the fasta and gff3 files the user would like to analyze. In this way, the names of the files are not hard-coded into the script.
@@ -78,20 +78,35 @@ for name in gff3_file_names:
     gff3.close()
 
 
-#Read in the gene names and motif sequence files.
-gene_name_file = open(file_path + "zea_mays_genes.txt")
-genes_list = [] #Make a list of the co-expressed genes
-for line in gene_name_file:
-    genes_list.append(line.rstrip())
+#A function to read in files per line.
+def read_file(file_name):
+    file = open(file_path + str(file_name))
+    file_list = []
+    for line in file:
+        file_list.append(line.rstrip())
+    
+    file.close()
+    return (file_list)
 
-gene_name_file.close()
 
-motif_file = open(file_path + "promoters.txt")
-motif_list = [] #Make a list of the motif sequences
-for line in motif_file:
-    motif_list.append(line.rstrip())
+#Read in the gene names and motif sequence files. 
+genes_list = read_file("zea_mays_genes.txt")
+motif_list = read_file("promoters.txt")
 
-motif_file.close()
+
+# gene_name_file = open(file_path + "zea_mays_genes.txt")
+# genes_list = [] #Make a list of the co-expressed genes
+# for line in gene_name_file:
+#     genes_list.append(line.rstrip())
+
+# gene_name_file.close()
+
+# motif_file = open(file_path + "promoters.txt")
+# motif_list = [] #Make a list of the motif sequences
+# for line in motif_file:
+#     motif_list.append(line.rstrip())
+
+# motif_file.close()
 
 
 #Create a GFF object to extract the features we require for further analysis. 
@@ -163,21 +178,45 @@ def downstream_seq(dna):
     
     return (new_dna)
 
-promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
+#A function to create the list of promoter sequences. The function takes into account if the gene is on the positive or negative strand. As the gene does not need o correspond to these sequences, we will not be addressing the gene names anymore.
+def promoters(gff_list):
+    promoter_list = []
 
-for object in selected_genes_class_gff3:
-    chromosome_number = object.chr
+    for object in gff_list:
+        chromosome_number = object.chr
 
-    if object.strand == "+":
-        start_seq = object.start
-        seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
-        promoter_sequence.append(seq)
+        if object.strand == "+":
+            start_seq = object.start
+            seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
+            promoter_list.append(seq)
+        
+        elif object.strand == "-":
+            start_seq = object.end
+            seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
+            rc_seq = reverse_complement(seq)
+            promoter_list.append(rc_seq)
     
-    elif object.strand == "-":
-        start_seq = object.end
-        seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
-        rc_seq = reverse_complement(seq)
-        promoter_sequence.append(rc_seq)
+    return (promoter_list)
+
+
+promoter_sequence = promoters(selected_genes_class_gff3)
+
+
+# promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore. #MAKE FUNCTION
+
+# for object in selected_genes_class_gff3:
+#     chromosome_number = object.chr
+
+#     if object.strand == "+":
+#         start_seq = object.start
+#         seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
+#         promoter_sequence.append(seq)
+    
+#     elif object.strand == "-":
+#         start_seq = object.end
+#         seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
+#         rc_seq = reverse_complement(seq)
+#         promoter_sequence.append(rc_seq)
         
 
 #Repeated this code to check if I was extracting the correct promoter sequences.
@@ -240,21 +279,24 @@ random_genes_class_gff3 = random.sample(complete_class_gff3, 594)
 #     print("\nRandomly selected genes have duplicates.")
 
 #Extract promoter sequences 
-promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
 
-for object in random_genes_class_gff3:
-    chromosome_number = object.chr
+promoter_sequence = promoters(random_genes_class_gff3)
 
-    if object.strand == "+":
-        start_seq = object.start
-        seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
-        promoter_sequence.append(seq)
+# promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
+
+# for object in random_genes_class_gff3:
+#     chromosome_number = object.chr
+
+#     if object.strand == "+":
+#         start_seq = object.start
+#         seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
+#         promoter_sequence.append(seq)
     
-    elif object.strand == "-":
-        start_seq = object.end
-        seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
-        rc_seq = reverse_complement(seq)
-        promoter_sequence.append(rc_seq)
+#     elif object.strand == "-":
+#         start_seq = object.end
+#         seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
+#         rc_seq = reverse_complement(seq)
+#         promoter_sequence.append(rc_seq)
 
 #Remove any Ns; choose downstream
 iter = 0
@@ -272,6 +314,7 @@ for motif in motif_list:
         count += len(re.findall(match, seq, re.I)) #To ignore cases
         
     motif_dict[motif] = count
+
 
 
 #Write the motif_dict into a file for submission.
