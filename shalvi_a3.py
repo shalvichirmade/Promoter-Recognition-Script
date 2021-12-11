@@ -18,8 +18,23 @@ while True:
     correct = input("\nPlease double-check your file path; it should end with a slash. Do you wish to continue? Enter y or n. ")
 
     if correct == "y":
-        print("\nYou have entered the correct file path, we will continue.\n")
-        break
+        print("\nYou have entered the correct file path.\n")
+        
+        gene_file = input("\nPlease enter the file name contianing the list of coexpressed genes you wish to analyze.\nFor example, if your file name is zea_mays_genes.txt then please enter: zea_mays_genes.txt\n\n")
+        motif_file = input("\nPlease enter the file name contianing the motif list you wish to analyze.\nFor example, if your file name is promoters.txt then please enter: promoters.txt\n\n")
+
+        print("\nThe file names you have chosen are:", gene_file, "for your list of coexpressed genes\nand", motif_file, "for your motif list.")
+
+        cont = input("\nPlease double check these names. Do you wish to continue? Enter y or n ")
+
+        if cont == "y":
+            print("\nYou have entered the correct file names. Let us continue.\n")
+            break
+        elif cont == "n":
+            print("\nPlease re-enter your file names.")
+        else:
+            print("\nYou have not entered the approproate letter. Please try again.")
+
     elif correct == "n":
         print("\nPlease re-enter your file path.")
     else:
@@ -90,8 +105,8 @@ def read_file(file_name):
 
 
 #Read in the gene names and motif sequence files. 
-genes_list = read_file(file_path + "zea_mays_genes.txt")
-motif_list = read_file(file_path + "promoters.txt")
+genes_list = read_file(file_path + gene_file)
+motif_list = read_file(file_path + motif_file)
 
 
 # gene_name_file = open(file_path + "zea_mays_genes.txt")
@@ -129,7 +144,7 @@ for file in complete_gff3: #Remember this was a list of lists
 
 
 #Check to see if there are any duplicated gene entries. If yes then there may be more than one entry for a particular gene. If not then there are no multiple TSSs for any of the Zea mays genes.
-complete_gene_set = set() #Sets can not have duplicates
+complete_gene_set = set() #Sets cannot have duplicates
 for gene in complete_class_gff3:
     complete_gene_set.add(gene.name)
 
@@ -170,7 +185,7 @@ def reverse_complement(dna):
 
     return("".join(complement_dict[base] for base in reversed(dna)))
 
-#A function to see if there any Ns in the promoter sequence and only extratc the downstream bases from the Ns.
+#A function to see if there any Ns in the promoter sequence and only extract the downstream bases from the Ns.
 def downstream_seq(dna):
     dna_length = len(dna)
     last_N = dna.rfind("N")
@@ -230,11 +245,6 @@ for seq in promoter_sequence:
         promoter_sequence[iter] = downstream_seq(seq)
         iter += 1
 
-# #Check to see if there are any N bases in the promoter regions that have been chosen. If so, delete them.
-# for seq in promoter_sequence:
-#     if "N" in seq:
-#         seq.replace("N", "")
-
 #There are no N's in our selected promoters.
 
 
@@ -255,7 +265,6 @@ def motif_output_file(m_list, pr_seq, file_name):
             
         motif_dict[motif] = count
 
-
     #Write the motif_dict into a file for submission.
     genes_output = open(file_name, "w")
 
@@ -269,8 +278,7 @@ def motif_output_file(m_list, pr_seq, file_name):
 
 
 #Write the selected genes output to a new file for submission.
-motif_output_file(motif_list, promoter_sequence, file_path + "Selected_Genes_Output.txt")
-
+motif_output_file(motif_list, promoter_sequence, file_path + "Coexpressed_Genes_Output.txt")
 
 
 # motif_dict = {} #Make a dictionary counting the number of times the motif sequence is present
@@ -296,38 +304,12 @@ motif_output_file(motif_list, promoter_sequence, file_path + "Selected_Genes_Out
 
 
 ##Randomly select 594 genes from complete_class_gff3 and conduct the same analysis. This number was chosen as the zea_mays_genes.txt files contains a list of 594 genes.
+
 import random #The only way I found to be able to randomly select entries
 random_genes_class_gff3 = random.sample(complete_class_gff3, 594) 
 
-# #Check if any of the gene names have been duplicated.
-# random_gene_set = set() #Sets can not have duplicates
-# for gene in random_genes_class_gff3:
-#     random_gene_set.add(gene.name)
-
-# if (len(random_gene_set) == len(random_genes_class_gff3)): #If the length of the set matches the number of randomly chosen genes, then there are no duplicates
-#     print("\nRandomly selected genes have no duplicates.")
-# else:
-#     print("\nRandomly selected genes have duplicates.")
-
 #Extract promoter sequences 
-
 promoter_sequence = promoters(random_genes_class_gff3)
-
-# promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
-
-# for object in random_genes_class_gff3:
-#     chromosome_number = object.chr
-
-#     if object.strand == "+":
-#         start_seq = object.start
-#         seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
-#         promoter_sequence.append(seq)
-    
-#     elif object.strand == "-":
-#         start_seq = object.end
-#         seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
-#         rc_seq = reverse_complement(seq)
-#         promoter_sequence.append(rc_seq)
 
 #Remove any Ns; choose downstream
 iter = 0
@@ -335,27 +317,6 @@ for seq in promoter_sequence:
     if "N" in seq:
         promoter_sequence[iter] = downstream_seq(seq)
         iter += 1
-
-#Create motif dictionary to store counts.
-# motif_dict = {}
-# for motif in motif_list:
-#     count = 0
-#     for seq in promoter_sequence:
-#         match = str("(?=" + motif + ")") #To count all occurences of the motif
-#         count += len(re.findall(match, seq, re.I)) #To ignore cases
-        
-#     motif_dict[motif] = count
-
-
-
-# #Write the motif_dict into a file for submission.
-# random_genes_output = open(file_path + "Random_Genes_Output.txt", "w")
-
-# random_genes_output.write("Motifs\tCounts\n\n") #Title for output file
-# for motif in motif_dict:
-#     random_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
-
-# random_genes_output.close()
 
 #Write the random genes output to a new file for submission.
 motif_output_file(motif_list, promoter_sequence, file_path + "Random_Genes_Output.txt")
