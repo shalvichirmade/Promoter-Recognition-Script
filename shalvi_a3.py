@@ -71,7 +71,7 @@ for name in fasta_file_names:
             continue
         else:
             strList.append(line.rstrip()) #Line 1 that had to be changed
-            #dna += line.rstrip() #Before, this was the only line used
+            #dna += line.rstrip() #Before, this was the only line used and then complete_dna.append(dna)
     complete_dna.append("".join(strList)) #Line 2 that had to be changed
     print("\nChromosome", num, "FASTA done.")
     num += 1
@@ -114,21 +114,6 @@ genes_list = read_file(file_path + gene_file)
 motif_list = read_file(file_path + motif_file)
 
 
-# gene_name_file = open(file_path + "zea_mays_genes.txt")
-# genes_list = [] #Make a list of the co-expressed genes
-# for line in gene_name_file:
-#     genes_list.append(line.rstrip())
-
-# gene_name_file.close()
-
-# motif_file = open(file_path + "promoters.txt")
-# motif_list = [] #Make a list of the motif sequences
-# for line in motif_file:
-#     motif_list.append(line.rstrip())
-
-# motif_file.close()
-
-
 #Create a GFF object to extract the features we require for further analysis. 
 class GFF(object):    
     def __init__(self, data):  
@@ -167,15 +152,6 @@ for object in complete_class_gff3:
     if (object.name in genes_list):
         selected_genes_class_gff3.append(object)
 
-# #Check to see if there any duplicated genes in your list.
-# if len(genes_list) == len(selected_genes_class_gff3):
-#     print("\nThere are no multiple TSSs for your selected genes.")
-# elif len(genes_list) > len(selected_genes_class_gff3):
-#     print("\nThere are some genes from your list that have not been found. Please make sure you have included the correct gene names and restart this program.")
-# else:
-#     print("\nYou may have multiple TSSs for a few genes. Please choose the most upstream one.")
-
-# #For our list, there are no multiple TSSs for any of the genes, so we will proceed.
 
 
 #Now we need to extract the promoter region for each gene of interest; this corresponds to 500 nucleotides upstream from the start of the gene. If the gene is on the + strand, 500 nucleotides is 500-start position. If the gene is on the - strand, 500 nucleotides is 500+end position.
@@ -198,7 +174,7 @@ def downstream_seq(dna):
     
     return (new_dna)
 
-#A function to create the list of promoter sequences. The function takes into account if the gene is on the positive or negative strand. As the gene does not need o correspond to these sequences, we will not be addressing the gene names anymore.
+#A function to create the list of promoter sequences. The function takes into account if the gene is on the positive or negative strand. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore.
 def promoters(gff_list):
     promoter_list = []
 
@@ -221,27 +197,6 @@ def promoters(gff_list):
 
 promoter_sequence = promoters(selected_genes_class_gff3)
 
-
-# promoter_sequence = [] #Make a list of all the promoter sequences. As the gene does not need to correspond to these sequences, we will not be addressing the gene names anymore. #MAKE FUNCTION
-
-# for object in selected_genes_class_gff3:
-#     chromosome_number = object.chr
-
-#     if object.strand == "+":
-#         start_seq = object.start
-#         seq = complete_dna[chromosome_number-1][start_seq-501:start_seq-1]
-#         promoter_sequence.append(seq)
-    
-#     elif object.strand == "-":
-#         start_seq = object.end
-#         seq = complete_dna[chromosome_number-1][start_seq:start_seq+500]
-#         rc_seq = reverse_complement(seq)
-#         promoter_sequence.append(rc_seq)
-        
-
-#Repeated this code to check if I was extracting the correct promoter sequences.
-# print(selected_genes_class_gff3[0].name, selected_genes_class_gff3[0].start)
-# print(complete_dna[0].find(promoter_sequence[0]))
 
 #If there are any N's in the promoter sequences, the instructions ask us to disregard any bases before the N's and only carry n with the downstream bases.
 iter = 0
@@ -286,26 +241,6 @@ def motif_output_file(m_list, pr_seq, file_name):
 motif_output_file(motif_list, promoter_sequence, file_path + "Coexpressed_Genes_Output.txt")
 
 
-# motif_dict = {} #Make a dictionary counting the number of times the motif sequence is present
-
-# for motif in motif_list:
-#     count = 0
-#     for seq in promoter_sequence:
-#         match = str("(?=" + motif + ")") #To count all occurences of the motif
-#         count += len(re.findall(match, seq, re.I)) #To ignore cases
-        
-#     motif_dict[motif] = count
-
-
-# #Write the motif_dict into a file for submission.
-# selected_genes_output = open(file_path + "Selected_Genes_Output.txt", "w")
-
-# selected_genes_output.write("Motifs\tCounts\n\n") #Title for output file
-# for motif in motif_dict:
-#     selected_genes_output.write(motif + "\t" + str(motif_dict[motif]) + "\n")
-
-# selected_genes_output.close()
-
 
 
 ##Randomly select 594 genes from complete_class_gff3 and conduct the same analysis. This number was chosen as the zea_mays_genes.txt files contains a list of 594 genes.
@@ -327,8 +262,5 @@ for seq in promoter_sequence:
 motif_output_file(motif_list, promoter_sequence, file_path + "Random_Genes_Output.txt")
 
 ##In the mutiple tries I have run, I have found that every time I chose a different selection of random genes, the number of motifs found are consistent with the values of the selected genes. There are no motifs, that I have seen, that are notably over or under represented amongst the coexpressed genes!
-
-
-
 
 
