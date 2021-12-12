@@ -11,7 +11,7 @@
 
 #User to enter the file path containing all the required files for this script.
 while True:
-    file_path = input("\nPlease enter the filepath to the directory you will using for this script. This directory should include the following files: Fasta-GFF3.txt, promoters.txt, zea_mays_genes.txt and all the corresponding FASTA and GFF3 files listed in Fasta-GFF3.txt\n\n")
+    file_path = input("\nPlease enter the filepath to the directory you will using for this script. This directory should include the following files: Fasta-GFF3.txt, promoters.txt, zea_mays_genes.txt and all the corresponding FASTA and GFF3 files listed in Fasta-GFF3.txt. These files should not be in another folder; all the files should be in one folder and this is the directory path you will be inputting.\n\n")
 
     print("\nYour file path is", file_path)
 
@@ -55,6 +55,8 @@ for line in fg_file.readlines():
 fg_file.close()
 
 #Open each FASTA file and store its DNA sequence.
+#Note: I use a Mac and I found an error on the ways some functions are run on Windows. When I first wrote my code, I did not have the variables, strList or lines, I had to add those because of the way Windows was utilizing the append function. On a Mac, my previous code read each FASTA file within two seconds but when my code was run on a Windows, it tooks over 40 minutes per FASTA file.. I found a solution; I had to add strList and create complete_dna using "".join instead of just using .append. Now, this code reads each FASTA file within two seconds on both Mac and Windows.
+
 complete_dna = [] #A list where every element is the DNA sequence from each FASTA file
 num = 1
 print("This step takes a long time, please be patient.")
@@ -62,12 +64,15 @@ print("This step takes a long time, please be patient.")
 for name in fasta_file_names:
     fasta = open(file_path + name)  
     dna = ""
-    for line in fasta.readlines():
+    lines = fasta.readlines() #Added variable 1 to work on Windows
+    strList=[] #Added variable 2 to work on Windows
+    for line in lines: #Before, this read: for line in fasta.readlines():
         if line.startswith(">"):
             continue
         else:
-            dna += line.rstrip()
-    complete_dna.append(dna)
+            strList.append(line.rstrip()) #Line 1 that had to be changed
+            #dna += line.rstrip() #Before, this was the only line used
+    complete_dna.append("".join(strList)) #Line 2 that had to be changed
     print("\nChromosome", num, "FASTA done.")
     num += 1
     fasta.close()
