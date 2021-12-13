@@ -11,7 +11,7 @@
 
 #User to enter the file path containing all the required files for this script.
 while True:
-    file_path = input("\nPlease enter the filepath to the directory you will using for this script. This directory should include the following files: Fasta-GFF3.txt, promoters.txt, zea_mays_genes.txt and all the corresponding FASTA and GFF3 files listed in Fasta-GFF3.txt. These files should not be in another folder; all the files should be in one folder and this is the directory path you will be inputting.\n\n")
+    file_path = input("\nPlease enter the filepath to the directory you will using for this script. Make sure to add a slash at the end.\nThis directory should include the following files:\nFasta-GFF3.txt, promoters.txt, zea_mays_genes.txt and all the corresponding FASTA and GFF3 files listed in Fasta-GFF3.txt.\nThese files should not be in separate folders; all the files should be in one folder and this is the directory path you will be inputting.\n\n")
 
     print("\nYour file path is", file_path)
 
@@ -65,7 +65,7 @@ for name in fasta_file_names:
     fasta = open(file_path + name)  
     dna = ""
     lines = fasta.readlines() #Added variable 1 to work on Windows
-    strList=[] #Added variable 2 to work on Windows
+    strList = [] #Added variable 2 to work on Windows
     for line in lines: #Before, this read: for line in fasta.readlines():
         if line.startswith(">"):
             continue
@@ -198,7 +198,7 @@ def promoters(gff_list):
 promoter_sequence = promoters(selected_genes_class_gff3)
 
 
-#If there are any N's in the promoter sequences, the instructions ask us to disregard any bases before the N's and only carry n with the downstream bases.
+#If there are any N's in the promoter sequences, the instructions ask us to disregard any bases before the N's and only carry on with the downstream bases.
 iter = 0
 for seq in promoter_sequence:
     if "N" in seq:
@@ -242,7 +242,6 @@ motif_output_file(motif_list, promoter_sequence, file_path + "Coexpressed_Genes_
 
 
 
-
 ##Randomly select 594 genes from complete_class_gff3 and conduct the same analysis. This number was chosen as the zea_mays_genes.txt files contains a list of 594 genes.
 
 import random #The only way I found to be able to randomly select entries
@@ -261,6 +260,12 @@ for seq in promoter_sequence:
 #Write the random genes output to a new file for submission.
 motif_output_file(motif_list, promoter_sequence, file_path + "Random_Genes_Output.txt")
 
-##In the mutiple tries I have run, I have found that every time I chose a different selection of random genes, the number of motifs found are consistent with the values of the selected genes. There are no motifs, that I have seen, that are notably over or under represented amongst the coexpressed genes!
+
+
+##Output a file containing a brief comparison of the coexpressed and random genes.
+comparison_expression_file = open(file_path + "Comparison_Expression.txt", "w")
+
+comparison_expression_file.write("In the mutiple tries I have run, I have found that every time I chose a different selection of random genes, the number of motifs found are consistent with the values of the selected genes." + "\n\n" + "There are no motifs, that I have seen, that are notably over or under represented amongst the coexpressed genes in comparison to the random genes!" + "\n\n" + "For both the coexpressed and random gene analysis, motif AAAG had over 1000 hits while the others were either  0, single digits or less than 500.")
+
 
 
