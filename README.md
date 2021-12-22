@@ -2,6 +2,7 @@
 Assignment 3 - BINF 6410
 By Shalvi Chirmade
 Due December 13, 2021
+Grade: 100%
 
 Fasta-GFF3.txt file can be edited to contain your required FASTA and GFF3 files.
 The format for this text file: fastafilename:gff3filename for each line.
